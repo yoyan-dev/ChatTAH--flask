@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChaTAH! | {% block title %} {% endblock %}</title>
+    <!-- <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/css/output.css')}}"
+    /> -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <header>
+      <div class="flex justify-between items-center p-2 bg-blue-500 text-white">
+        <img
+          class="rounded-full h-10 w-10 border-2 border-blue-200"
+          src="https://th.bing.com/th/id/OIP.utANnR_yzqzbf8wKFvnnCAHaHa?rs=1&pid=ImgDetMain"
+        />
+        <h1 class="text-2xl font-semibold">ChatTAH!</h1>
+        <div class="flex gap-3 items-center">
+          <img
+            class="rounded-full h-10 w-10 border-2 border-blue-200"
+            src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+          />
+          <a href="#">Logout</a>
+        </div>
+      </div>
+    </header>
+    <div class="mx-auto p-6 bg-gray-100">
+      {% block content %} {% endblock %}
+    </div>
+  </body>
+</html>
