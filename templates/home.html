@@ -1,121 +1,35 @@
 {% extends "layouts/index.html" %} {% block title %}Home Page{% endblock %} {%
 block content %}
 <div class="flex gap-5">
-  <div class="bg-white p-6 rounded-lg shadow-md w-96">
-    <h1 class="text-2xl font-semibold">Welcome to ChaTAH!</h1>
-    <p class="text-gray-500">The best chat app in the world!</p>
+  <div class="bg-white p-6 rounded-lg shadow-md w-96 flex flex-col gap-3">
+    <div>
+      <h1 class="text-2xl font-semibold">Welcome to ChaTAH!</h1>
+      <p class="text-gray-500">The best chat app in the world!</p>
+    </div>
+    {% if user %}
+    <div
+      class="flex items-center space-x-4 rtl:space-x-reverse p-3 bg-gray-200 rounded-lg my-2"
+    >
+      <div class="shrink-0">
+        <img
+          class="w-10 h-10 rounded-lg"
+          src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+          alt="Neil image"
+        />
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+          {{ user.username }}
+        </p>
+        <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+          {{ user.email }}
+        </p>
+      </div>
+    </div>
+    {% endif %}
     <div class="border p-3 rounded-lg border-gray-400">
-      <h1 class="text-xl fony-semibold py-2">Chat with your friends</h1>
-      <ul
-        class="max-w-md divide-y max-h-96 overflow-auto divide-gray-200 dark:divide-gray-700"
-      >
-        <li class="pb-3 sm:pb-4">
-          <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="shrink-0">
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                alt="Neil image"
-              />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                Neil Sims
-              </p>
-              <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                1 new message
-              </p>
-            </div>
-          </div>
-        </li>
-        <li class="py-3 sm:py-4">
-          <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="shrink-0">
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                alt="Neil image"
-              />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                Bonnie Green
-              </p>
-              <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                1 new message
-              </p>
-            </div>
-          </div>
-        </li>
-        <li class="py-3 sm:py-4">
-          <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="shrink-0">
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                alt="Neil image"
-              />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                Michael Gough
-              </p>
-              <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                1 new message
-              </p>
-            </div>
-          </div>
-        </li>
-        <li class="py-3 sm:py-4">
-          <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="shrink-0">
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                alt="Neil image"
-              />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                Thomas Lean
-              </p>
-              <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                1 new message
-              </p>
-            </div>
-          </div>
-        </li>
-        <li class="pt-3 pb-0 sm:pt-4">
-          <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="shrink-0">
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                alt="Neil image"
-              />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p
-                class="text-sm font-medium text-gray-900 truncate dark:text-white"
-              >
-                Lana Byrd
-              </p>
-              <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                1 new message
-              </p>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <form class="max-w-md mx-auto mt-2">
+      <h1 class="text-xl fony-semibold">Chat with your friends</h1>
+      <form class="max-w-md mx-auto">
         <label
           for="default-search"
           class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
@@ -156,6 +70,35 @@ block content %}
           </button>
         </div>
       </form>
+      <div class="max-h-56 overflow-auto py-2">
+        <ul
+          class="max-w-md divide-y max-h-96 overflow-auto divide-gray-200 dark:divide-gray-700"
+        >
+          {% for u in users %}
+          <li class="pb-3 sm:pb-4">
+            <div class="flex items-center space-x-4 rtl:space-x-reverse">
+              <div class="shrink-0">
+                <img
+                  class="w-8 h-8 rounded-full"
+                  src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+                  alt="Neil image"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p
+                  class="text-sm font-medium text-gray-900 truncate dark:text-white"
+                >
+                  {{ u.username }}
+                </p>
+                <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                  1 new message
+                </p>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
   <div
@@ -176,7 +119,8 @@ block content %}
       </div>
       <div>icon</div>
     </div>
-    <div class="flex flex-col gap-3 h-96 overflow-auto">
+    <div id="message-list"></div>
+    <!-- <div class="flex flex-col gap-3 h-96 overflow-auto">
       <div class="flex items-start gap-2.5">
         <img
           class="w-8 h-8 rounded-full"
@@ -220,8 +164,8 @@ block content %}
           </div>
         </div>
       </div>
-    </div>
-    <form>
+    </div> -->
+    <form onsubmit="(e) => sendMessage(e, 2)">
       <label for="chat" class="sr-only">Your message</label>
       <div
         class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700"
@@ -280,7 +224,7 @@ block content %}
           <span class="sr-only">Add emoji</span>
         </button>
         <textarea
-          id="chat"
+          id="messageContent"
           rows="1"
           class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Your message..."
@@ -306,4 +250,52 @@ block content %}
     </form>
   </div>
 </div>
+<script>
+  async function fetchMessages() {
+    try {
+      const response = await fetch("/messages");
+      const messages = await response.json();
+      console.log(messages);
+      let messageContainer = document.getElementById("message-list");
+      messageContainer.innerHTML = "";
+
+      messages.forEach((msg) => {
+        let msgElement = document.createElement("div");
+        msgElement.classList.add("message-item");
+        msgElement.innerHTML = `<strong>${msg.senderId}:</strong> ${msg.content} <br><small>${msg.created_at}</small>`;
+        messageContainer.appendChild(msgElement);
+      });
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  }
+
+  setInterval(fetchMessages, 3000);
+
+  fetchMessages();
+
+  async function sendMessage(e, receiverId) {
+    e.preventDefault();
+    let content = document.getElementById("messageContent").value;
+
+    await fetch("/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: content, receiver_id: receiverId }),
+    })
+      .then((response) => {
+        response.json();
+        console.log(response);
+      })
+      .then((data) => {
+        if (data.success) {
+          console.log(data.success);
+          document.getElementById("messageContent").value = "";
+        } else {
+          console.log("Error: " + data.error);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+</script>
 {% endblock %}
