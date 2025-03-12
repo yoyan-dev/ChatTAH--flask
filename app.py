@@ -48,7 +48,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = User.query.get(user_id)  # Fetch the logged-in user
+        g.user = User.query.get(user_id) 
 
 def get_users():
     users = User.query.all() 
@@ -114,12 +114,12 @@ def get_messages():
     return jsonify(messages_list)
 
 
-@app.route('/send', methods=['POST'])
+@app.route('/send', methods=['GET','POST'])
 def send_message():
     data = request.get_json()
     content = data.get('content')
     receiver_id = data.get('receiver_id')
-    current_user = g.user  # Ensure this is properly set
+    current_user = g.user  
 
     if not content or not receiver_id:
         return jsonify({'error': 'Content and Receiver ID are required'}), 400
