@@ -58,6 +58,10 @@ def get_users():
     ]
     return user_list
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -70,7 +74,7 @@ def register():
             db.session.add(user)
             db.session.commit()
             message = f'Account created! You can now log in.'
-            return render_template('index.html', message=message)
+            return render_template('login.html', message=message)
         except:
             message = f'Error! please try again.'
             return render_template('register.html', message=message)
@@ -90,28 +94,39 @@ def login():
             return redirect(url_for('home'))
         else:
             message = 'Login failed. Check your credentials.'
-            return render_template('index.html', message=message)
+            return render_template('login.html', message=message)
 
-    return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/test-messages')
 def test_messages():
     messages = Message.query.all()
     return jsonify([msg.content for msg in messages]) 
 
-@app.route('/messages', methods=['GET'])
-def get_messages():
-    current_user = g.user
-    messages = Message.query.all()
-    messages_list = [{
-        "msgId": msg.msgId,
-        "senderId": msg.senderId,
-        "receiverId": msg.receiverId,
-        "content": msg.content,
-        "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
-    } for msg in messages]
+from flask import jsonify
 
-    return jsonify(messages_list)
+@app.route('/messages/<int:user_id>', methods=['GET'])
+def get_messages(user_id):
+    try:
+        current_user = g.user 
+        messages = Message.query.filter(
+            (Message.senderId == current_user.id) & (Message.receiverId == user_id) |
+            (Message.senderId == user_id) & (Message.receiverId == current_user.id)
+        ).order_by(Message.created_at.asc()).all()
+
+        messages_list = [{
+            "msgId": msg.msgId,
+            "senderId": msg.senderId,
+            "receiverId": msg.receiverId,
+            "content": msg.content,
+            "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S")  
+        } for msg in messages]
+
+        return jsonify(messages_list)
+    
+    except Exception as e:
+        return jsonify({"error": "Something went wrong!"}), 500 
+
 
 
 @app.route('/send', methods=['GET','POST'])
@@ -134,6 +149,21 @@ def send_message():
         db.session.rollback()
         return jsonify({'error': 'Database error!'}), 500
 
+
+@app.route('/getuser/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email
+    })
+
+
 @app.route('/home')
 @login_required
 def home():
@@ -143,12 +173,21 @@ def home():
         return render_template('home.html', user=g.user, users=users)
     else:
         return render_template('index.html')
+    
+@app.route('/profile')
+@login_required
+def profile():
+    if g.user:
+        current_user = g.user
+        users = User.query.filter(User.id != current_user.id).all()
+        return render_template('profile.html', user=g.user, users=users)
+    else:
+        return render_template('login.html')
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('Logged out successfully!', 'info')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':

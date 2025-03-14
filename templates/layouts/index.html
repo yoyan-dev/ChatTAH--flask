@@ -27,11 +27,11 @@
             class="rounded-full h-10 w-10 border-2 border-blue-200"
             src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
           />
-          <a href="#">Logout</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
         </div>
       </div>
     </header>
-    <div class="mx-auto p-6 bg-gray-100">
+    <div class="mx-auto p-6 bg-gray-100 h-screen">
       {% block content %} {% endblock %}
     </div>
   </body>
