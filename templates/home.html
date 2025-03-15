@@ -57,28 +57,42 @@ block content %}
             </svg>
           </div>
           <input
-            type="search"
-            id="default-search"
+            type="text"
+            id="search"
             class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search..."
-            required
           />
-          <button
-            type="submit"
-            class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Search
-          </button>
         </div>
       </form>
       <div class="max-h-56 overflow-auto py-2">
         <ul
           class="max-w-md divide-y max-h-96 overflow-auto divide-gray-200 dark:divide-gray-700"
-        >
-          {% for u in users %}
+          id="user-list"
+        ></ul>
+      </div>
+    </div>
+  </div>
+  <div id="message-con"></div>
+</div>
+<script>
+  const searchInput = document.getElementById("search");
+
+  async function getUsers(param) {
+    const response = await fetch("/search/" + param);
+    const users = await response.json();
+    console.log(users);
+    let userList = document.getElementById("user-list");
+    userList.innerHTML = "";
+    if (users.error) {
+      userList.innerHTML = "";
+      return;
+    }
+
+    users.forEach((user) => {
+      userList.innerHTML += `
           <li
             class="pb-3 sm:pb-4 cursor-pointer user-item"
-            data-user-id="{{u.id}}"
+            data-user-id="${user.id}"
           >
             <div class="flex items-center space-x-4 rtl:space-x-reverse">
               <div class="shrink-0">
@@ -92,22 +106,51 @@ block content %}
                 <p
                   class="text-sm font-medium text-gray-900 truncate dark:text-white"
                 >
-                  {{ u.username }}
+                  ${user.username}
                 </p>
-                <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                  1 new message
+                <p class="text-sm ${
+                  user.unread_count > 0
+                    ? "font-semibold text-dark"
+                    : "text-gray-500"
+                } truncate dark:text-gray-400">
+                  ${
+                    user.unread_count > 0
+                      ? user.unread_count + " new message"
+                      : user.last_message
+                      ? user.last_message
+                      : "send message"
+                  } 
                 </p>
               </div>
             </div>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div id="message-con"></div>
-</div>
-<script>
+          </li>`;
+    });
+
+    document.querySelectorAll(".user-item").forEach((user) => {
+      user.addEventListener("click", async () => {
+        let userId = user.getAttribute("data-user-id");
+        fetchMessages(userId);
+        const response = await fetch("/updateMessageStatus/" + userId);
+        getUsers(searchInput.value);
+      });
+    });
+  }
+
+  getUsers("");
+  searchInput.addEventListener("input", () => {
+    getUsers(searchInput.value);
+  });
+
+  async function deleteConvo(uid) {
+    try {
+      const response = await fetch("/deleteConvo/" + uid);
+      const result = await response.json();
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async function appendChatBox(uid) {
     const response = await fetch("/getuser/" + uid);
     const user = await response.json();
@@ -117,31 +160,28 @@ block content %}
     let chatBox = document.createElement("div");
     chatBox.className =
       "flex flex-col justify-between bg-white p-6 rounded-lg shadow-md w-[30rem]";
-
+    messageCon.innerHTML = "";
     chatBox.innerHTML = `
     <div class="flex items-center space-x-4 rtl:space-x-reverse border-b border-gray-300 pb-4">
       <div class="shrink-0">
         <img class="w-8 h-8 rounded-full" src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav" alt="Neil image" />
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-lg font-medium text-gray-900 truncate dark:text-white">${user.username}</p>
-        <p class="text-sm text-gray-400 truncate dark:text-white">${user.email}</p>
+        <p class="text-lg font-medium text-gray-900 truncate dark:text-white">${
+          user.username
+        }</p>
+        <p class="text-sm text-gray-400 truncate dark:text-white">${
+          user.email
+        }</p>
       </div>
-      <div>icon</div>
+      ${user.message_count > 0 ? '<div id="delete">delete</div>' : ""}
     </div>
-    <div class="flex flex-col gap-3 h-96 overflow-auto py-2" id="message-list"></div>
+    <div class="overflow-auto flex flex-col-reverse gap-3 h-96  py-2" id="message-list">No message found</div>
     <div>
       <label for="chat" class="sr-only">Your message</label>
       <div class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-        <button type="button" class="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-            <path fill="currentColor" d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"/>
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"/>
-          </svg>
-          <span class="sr-only">Upload image</span>
-        </button>
         <textarea id="messageContent" rows="1" class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Your message..."></textarea>
-        <button type="submit" onclick="sendMessage(1)" class="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600">
+        <button type="submit" onclick="sendMessage(${uid})" class="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600">
           <svg class="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
             <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
           </svg>
@@ -152,62 +192,69 @@ block content %}
     `;
 
     messageCon.appendChild(chatBox);
-  }
-
-  async function fetchMessages(userID) {
-    try {
-      const response = await fetch("/messages/" + userID);
-      const messages = await response.json();
-      console.log(messages);
-      await appendChatBox(userID);
-      let messageContainer = document.getElementById("message-list");
-      messageContainer.innerHTML = "";
-      const imgSrc =
-        "https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav";
-      messages.forEach((msg) => {
-        const messageDiv = document.createElement("div");
-        messageDiv.className = `flex ${
-          msg.senderId.toString() === userID.toString()
-            ? "justify-end"
-            : "justify-start"
-        } items-start gap-2.5`;
-
-        const userImage =
-          msg.senderId.toString() !== userID.toString()
-            ? `<img class="w-8 h-8 rounded-full" src="${imgSrc}" alt="User Image" />`
-            : "";
-        messageDiv.innerHTML = `
-        ${userImage}
-          <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 ${
-            msg.senderId.toString() === userID.toString()
-              ? "border-blue-400 bg-blue-500 text-white"
-              : "border-gray-200 bg-gray-200 text-dark"
-          } rounded-e-xl rounded-es-xl dark:bg-gray-700">
-            <p class="text-sm font-normal pb-2.5">
-              ${msg.content}
-            </p>
-            <div class="flex items-center space-x-2 rtl:space-x-reverse">
-              <span class="text-sm font-normal text-gray-300 dark:text-gray-400">Sent</span>
-              <span class="text-sm font-normal text-gray-300 dark:text-gray-400">${
-                msg.created_at
-              }</span>
-            </div>
-          </div>
-        `;
-
-        messageContainer.appendChild(messageDiv);
+    if (user.message_count > 0) {
+      document.getElementById("delete").addEventListener("click", () => {
+        if (confirm("Do you want to delete this conversation?")) {
+          deleteConvo(user.id);
+        }
       });
-    } catch (error) {
-      console.error("Error fetching messages:", error);
     }
   }
 
-  document.querySelectorAll(".user-item").forEach((user) => {
-    user.addEventListener("click", () => {
-      let userId = user.getAttribute("data-user-id");
-      fetchMessages(userId);
-    });
-  });
+  async function fetchMessages(userID) {
+    await appendChatBox(userID);
+    let messageContainer = document.getElementById("message-list");
+    messageContainer.innerHTML = "";
+    setInterval(async () => {
+      try {
+        const response = await fetch("/messages/" + userID);
+        const messages = await response.json();
+        if (messages.error) {
+          messageContainer.innerHTML = "";
+          return;
+        }
+        messageContainer.innerHTML = "";
+        const imgSrc =
+          "https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav";
+        messages.forEach((msg) => {
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `flex ${
+            msg.senderId.toString() !== userID.toString()
+              ? "justify-end"
+              : "justify-start"
+          } items-start gap-2.5`;
+
+          const userImage =
+            msg.senderId.toString() !== userID.toString()
+              ? `<img class="w-8 h-8 rounded-full" src="${imgSrc}" alt="User Image" />`
+              : "";
+          messageDiv.innerHTML = `
+            ${userImage}
+              <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 ${
+                msg.senderId.toString() !== userID.toString()
+                  ? "border-blue-400 bg-blue-500 text-white"
+                  : "border-gray-200 bg-gray-200 text-dark"
+              } rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                <p class="text-sm font-normal pb-2.5">
+                  ${msg.content}
+                </p>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                  <span class="text-sm font-normal ${
+                    msg.senderId.toString() !== userID.toString()
+                      ? "text-gray-100"
+                      : "text-gray-400"
+                  }">sent ${msg.created_at}</span>
+                </div>
+              </div>
+            `;
+
+          messageContainer.appendChild(messageDiv);
+        });
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    }, 2000);
+  }
 
   // setInterval(fetchMessages, 3000);
 

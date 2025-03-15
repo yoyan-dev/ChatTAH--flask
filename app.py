@@ -31,6 +31,7 @@ class Message(db.Model):
     senderId = db.Column(db.Integer, nullable=False)  
     receiverId = db.Column(db.Integer, nullable=False) 
     content = db.Column(db.String(300), nullable=False)
+    status = db.Column(db.String(300), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -73,8 +74,8 @@ def register():
             user = User(username=username, email=email, password=password)
             db.session.add(user)
             db.session.commit()
-            message = f'Account created! You can now log in.'
-            return render_template('login.html', message=message)
+            flash('User registered successfully!', 'success')
+            return redirect(url_for('login'))
         except:
             message = f'Error! please try again.'
             return render_template('register.html', message=message)
@@ -112,7 +113,7 @@ def get_messages(user_id):
         messages = Message.query.filter(
             (Message.senderId == current_user.id) & (Message.receiverId == user_id) |
             (Message.senderId == user_id) & (Message.receiverId == current_user.id)
-        ).order_by(Message.created_at.asc()).all()
+        ).order_by(Message.created_at.desc()).all()
 
         messages_list = [{
             "msgId": msg.msgId,
@@ -134,13 +135,14 @@ def send_message():
     data = request.get_json()
     content = data.get('content')
     receiver_id = data.get('receiver_id')
+    status = 'unread'
     current_user = g.user  
 
     if not content or not receiver_id:
         return jsonify({'error': 'Content and Receiver ID are required'}), 400
 
     try:
-        message = Message(senderId=current_user.id, receiverId=receiver_id, content=content)
+        message = Message(senderId=current_user.id, receiverId=receiver_id, content=content, status=status)
         db.session.add(message)
         db.session.flush() 
         db.session.commit()
@@ -149,19 +151,118 @@ def send_message():
         db.session.rollback()
         return jsonify({'error': 'Database error!'}), 500
 
+@app.route('/updateMessageStatus/<int:user_id>', methods=['GET'])
+@login_required
+def update_message_status(user_id):
+    current_user = g.user
+
+    messages = Message.query.filter(
+        ((Message.senderId == current_user.id) & (Message.receiverId == user_id)) |
+        ((Message.senderId == user_id) & (Message.receiverId == current_user.id) & (Message.status == 'unread'))
+    ).order_by(Message.created_at.desc()).all()
+
+    if messages:
+        for msg in messages:
+            msg.status = "read"
+
+        db.session.commit() 
+        return jsonify({"message": "Message status updated"})
+
+    return jsonify({"message": "No unread messages found"})
+
+@app.route('/deleteConvo/<int:user_id>', methods=['GET'])
+def delete_messages(user_id):
+    current_user = g.user
+
+    condition = (
+            (Message.senderId == current_user.id) & (Message.receiverId == user_id)
+        ) | (
+            (Message.senderId == user_id) & (Message.receiverId == current_user.id)
+        )
+
+    deleted_count = db.session.query(Message).filter(condition).delete(synchronize_session=False)
+    db.session.commit()
+
+    if deleted_count > 0:
+        return jsonify({"message": f"Deleted {deleted_count} messages between users."})
+    else:
+        return jsonify({"message": "No messages found to delete."})
 
 @app.route('/getuser/<int:user_id>', methods=['GET'])
 def get_user(user_id):
+    current_user = g.user
     user = User.query.get(user_id)
 
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
+    message_count = Message.query.filter(
+        ((Message.senderId == user.id) & (Message.receiverId == current_user.id)) |
+        ((Message.senderId == current_user.id) & (Message.receiverId == user.id))
+    ).count()
+
     return jsonify({
         "id": user.id,
         "username": user.username,
-        "email": user.email
+        "email": user.email,
+        "message_count": message_count
     })
+
+
+@app.route('/search/<string:param>', methods=['GET'])
+@login_required
+def get_search_users(param):
+    current_user = g.user 
+
+    query = User.query.filter(User.id != current_user.id)
+
+    if param.strip(): 
+        query = query.filter(User.username.ilike(f"%{param}%"))
+
+    users = query.all()
+
+    if not users:
+        return jsonify({'error': 'User not found'}), 404
+
+    user_list = []
+    
+    for user in users:
+        unread_count = Message.query.filter(
+            (Message.senderId == user.id) & 
+            (Message.receiverId == current_user.id) & 
+            (Message.status == 'unread')
+        ).count()
+
+        last_message = None
+        message_date = None
+
+        last_message_obj = Message.query.filter(
+            ((Message.senderId == user.id) & (Message.receiverId == current_user.id)) |
+            ((Message.senderId == current_user.id) & (Message.receiverId == user.id))
+        ).order_by(Message.created_at.desc()).first()
+
+        if last_message_obj: 
+            last_message = last_message_obj.content
+            message_date = last_message_obj.created_at 
+        else:
+            last_message = "send message"
+            message_date = None
+
+        user_list.append({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "unread_count": unread_count,
+            "last_message": last_message,
+            "message_date": message_date  
+        })
+
+    sorted_user_list = sorted(
+        user_list,
+        key=lambda x: (x['message_date'] is None, x['message_date']),
+        reverse=True
+    )
+    return jsonify(sorted_user_list)
 
 
 @app.route('/home')
@@ -174,15 +275,15 @@ def home():
     else:
         return render_template('index.html')
     
-@app.route('/profile')
-@login_required
-def profile():
-    if g.user:
-        current_user = g.user
-        users = User.query.filter(User.id != current_user.id).all()
-        return render_template('profile.html', user=g.user, users=users)
-    else:
-        return render_template('login.html')
+# @app.route('/profile')
+# @login_required
+# def profile():
+#     if g.user:
+#         current_user = g.user
+#         users = User.query.filter(User.id != current_user.id).all()
+#         return render_template('profile.html', user=g.user, users=users)
+#     else:
+#         return render_template('login.html')
 
 @app.route('/logout')
 @login_required
