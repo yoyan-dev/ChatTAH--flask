@@ -59,9 +59,6 @@ def get_users():
     ]
     return user_list
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -82,7 +79,7 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/ogin', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -209,14 +206,15 @@ def get_user(user_id):
     })
 
 
+@app.route('/search/', methods=['GET'])
 @app.route('/search/<string:param>', methods=['GET'])
 @login_required
-def get_search_users(param):
+def get_search_users(param=None):
     current_user = g.user 
 
     query = User.query.filter(User.id != current_user.id)
 
-    if param.strip(): 
+    if param: 
         query = query.filter(User.username.ilike(f"%{param}%"))
 
     users = query.all()
@@ -257,12 +255,7 @@ def get_search_users(param):
             "message_date": message_date  
         })
 
-    sorted_user_list = sorted(
-        user_list,
-        key=lambda x: (x['message_date'] is None, x['message_date']),
-        reverse=True
-    )
-    return jsonify(sorted_user_list)
+    return jsonify(user_list)
 
 
 @app.route('/home')

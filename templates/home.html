@@ -1,6 +1,6 @@
 {% extends "layouts/index.html" %} {% block title %}Home Page{% endblock %} {%
 block content %}
-<div class="flex gap-5 justify-center">
+<div class="flex flex-wrap gap-5 justify-center">
   <div class="bg-white p-6 rounded-lg shadow-md w-96 flex flex-col gap-3">
     <div>
       <h1 class="text-2xl font-semibold">Welcome to ChaTAH!</h1>
@@ -76,64 +76,78 @@ block content %}
 </div>
 <script>
   const searchInput = document.getElementById("search");
-
+  let userList = document.getElementById("user-list");
+  userList.innerHTML = "";
   async function getUsers(param) {
-    const response = await fetch("/search/" + param);
-    const users = await response.json();
-    console.log(users);
-    let userList = document.getElementById("user-list");
-    userList.innerHTML = "";
-    if (users.error) {
+    setInterval(async () => {
+      const response = await fetch("/search/" + param);
+      const users = await response.json();
+      console.log(users);
       userList.innerHTML = "";
-      return;
-    }
+      if (users.error) {
+        userList.innerHTML = "";
+        return;
+      }
+      const sortedList = users.sort((a, b) => {
+        const dateA = a.message_date ? new Date(a.message_date) : null;
+        const dateB = b.message_date ? new Date(b.message_date) : null;
 
-    users.forEach((user) => {
-      userList.innerHTML += `
-          <li
-            class="pb-3 sm:pb-4 cursor-pointer user-item"
-            data-user-id="${user.id}"
-          >
-            <div class="flex items-center space-x-4 rtl:space-x-reverse">
-              <div class="shrink-0">
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
-                  alt="Neil image"
-                />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p
-                  class="text-sm font-medium text-gray-900 truncate dark:text-white"
-                >
-                  ${user.username}
-                </p>
-                <p class="text-sm ${
-                  user.unread_count > 0
-                    ? "font-semibold text-dark"
-                    : "text-gray-500"
-                } truncate dark:text-gray-400">
-                  ${
-                    user.unread_count > 0
-                      ? user.unread_count + " new message"
-                      : user.last_message
-                      ? user.last_message
-                      : "send message"
-                  } 
-                </p>
-              </div>
-            </div>
-          </li>`;
-    });
+        if (dateA === null && dateB === null) return 0;
+        if (dateA === null) return 1;
+        if (dateB === null) return -1;
 
-    document.querySelectorAll(".user-item").forEach((user) => {
-      user.addEventListener("click", async () => {
-        let userId = user.getAttribute("data-user-id");
-        fetchMessages(userId);
-        const response = await fetch("/updateMessageStatus/" + userId);
-        getUsers(searchInput.value);
+        return dateB - dateA;
       });
-    });
+
+      console.log(sortedList);
+
+      sortedList.forEach((user) => {
+        userList.innerHTML += `
+            <li
+              class="pb-3 sm:pb-4 cursor-pointer user-item"
+              data-user-id="${user.id}"
+            >
+              <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                <div class="shrink-0">
+                  <img
+                    class="w-8 h-8 rounded-full"
+                    src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+                    alt="Neil image"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p
+                    class="text-sm font-medium text-gray-900 truncate dark:text-white"
+                  >
+                    ${user.username}
+                  </p>
+                  <p class="text-sm ${
+                    user.unread_count > 0
+                      ? "font-semibold text-dark"
+                      : "text-gray-500"
+                  } truncate dark:text-gray-400">
+                    ${
+                      user.unread_count > 0
+                        ? user.unread_count + " new message"
+                        : user.last_message
+                        ? user.last_message
+                        : "send message"
+                    } 
+                  </p>
+                </div>
+              </div>
+            </li>`;
+      });
+
+      document.querySelectorAll(".user-item").forEach((user) => {
+        user.addEventListener("click", async () => {
+          let userId = user.getAttribute("data-user-id");
+          fetchMessages(userId);
+          const response = await fetch("/updateMessageStatus/" + userId);
+          getUsers(searchInput.value);
+        });
+      });
+    }, 2000);
   }
 
   getUsers("");
@@ -225,7 +239,7 @@ block content %}
           } items-start gap-2.5`;
 
           const userImage =
-            msg.senderId.toString() !== userID.toString()
+            msg.senderId.toString() === userID.toString()
               ? `<img class="w-8 h-8 rounded-full" src="${imgSrc}" alt="User Image" />`
               : "";
           messageDiv.innerHTML = `
@@ -270,6 +284,7 @@ block content %}
       body: JSON.stringify({ content: content, receiver_id: receiverId }),
     });
     document.getElementById("messageContent").value = "";
+    getUsers(searchInput.value);
   }
 </script>
 {% endblock %}
