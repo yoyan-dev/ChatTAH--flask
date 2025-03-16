@@ -19,15 +19,15 @@
       <div class="flex justify-between items-center p-2 bg-blue-500 text-white">
         <img
           class="rounded-full h-10 w-10 border-2 border-blue-200"
-          src="https://th.bing.com/th/id/OIP.utANnR_yzqzbf8wKFvnnCAHaHa?rs=1&pid=ImgDetMain"
+          src="{{url_for('static',filename='src/logo.jpg')}}"
         />
         <h1 class="text-2xl font-semibold">ChatTAH!</h1>
         <div class="flex gap-3 items-center">
           <img
             class="rounded-full h-10 w-10 border-2 border-blue-200"
-            src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+            src="{{url_for('static',filename='src/avatar.PNG')}}"
           />
-          <a href="{{ url_for('logout') }}">Logout</a>
+          <a href="{{ url_for('auth.logout') }}">Logout</a>
         </div>
       </div>
     </header>

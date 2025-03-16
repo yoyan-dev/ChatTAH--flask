@@ -15,7 +15,7 @@
         <img
           class="rounded-full border-2 border-blue-200"
           width="100"
-          src="https://th.bing.com/th/id/OIP.utANnR_yzqzbf8wKFvnnCAHaHa?rs=1&pid=ImgDetMain"
+          src="{{url_for('static',filename='src/logo.jpg')}}"
         />
         <h1 class="text-2xl font-semibold">ChatTAH!</h1>
         <a href="#"></a>
@@ -23,7 +23,7 @@
     </div>
     <script>
       setTimeout(() => {
-        window.location.assign("/login");
+        window.location.assign("/auth/login");
       }, 2000);
     </script>
   </body>

@@ -8,13 +8,12 @@ block content %}
     </div>
     {% if user %}
     <a
-      href="/profile"
       class="flex items-center space-x-4 rtl:space-x-reverse p-3 bg-gray-200 rounded-lg my-2"
     >
       <div class="shrink-0">
         <img
           class="w-10 h-10 rounded-lg"
-          src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+          src="{{url_for('static',filename='src/avatar.PNG')}}"
           alt="Neil image"
         />
       </div>
@@ -30,7 +29,7 @@ block content %}
     {% endif %}
     <div class="border p-3 rounded-lg border-gray-400">
       <h1 class="text-xl fony-semibold">Chat with your friends</h1>
-      <form class="max-w-md mx-auto">
+      <form class="max-w-md mx-auto hidden">
         <label
           for="default-search"
           class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
@@ -59,7 +58,7 @@ block content %}
           <input
             type="text"
             id="search"
-            class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="hidden w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search..."
           />
         </div>
@@ -77,10 +76,10 @@ block content %}
 <script>
   const searchInput = document.getElementById("search");
   let userList = document.getElementById("user-list");
-  userList.innerHTML = "";
+
   async function getUsers(param) {
-    setInterval(async () => {
-      const response = await fetch("/search/" + param);
+    const interval = setInterval(async () => {
+      const response = await fetch("/users/search/");
       const users = await response.json();
       console.log(users);
       userList.innerHTML = "";
@@ -111,7 +110,7 @@ block content %}
                 <div class="shrink-0">
                   <img
                     class="w-8 h-8 rounded-full"
-                    src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav"
+                    src="{{url_for('static',filename='src/avatar.PNG')}}"
                     alt="Neil image"
                   />
                 </div>
@@ -143,21 +142,23 @@ block content %}
         user.addEventListener("click", async () => {
           let userId = user.getAttribute("data-user-id");
           fetchMessages(userId);
-          const response = await fetch("/updateMessageStatus/" + userId);
+          const response = await fetch(
+            "/messages/updateMessageStatus/" + userId
+          );
           getUsers(searchInput.value);
         });
       });
     }, 2000);
   }
 
-  getUsers("");
+  getUsers("all");
   searchInput.addEventListener("input", () => {
-    getUsers(searchInput.value);
+    getUsers(searchInput.value ? searchInput.value : "all");
   });
 
   async function deleteConvo(uid) {
     try {
-      const response = await fetch("/deleteConvo/" + uid);
+      const response = await fetch("/messages/deleteConvo/" + uid);
       const result = await response.json();
       console.log(result);
     } catch (e) {
@@ -166,7 +167,7 @@ block content %}
   }
 
   async function appendChatBox(uid) {
-    const response = await fetch("/getuser/" + uid);
+    const response = await fetch("/users/getuser/" + uid);
     const user = await response.json();
     console.log(user);
     let messageCon = document.getElementById("message-con");
@@ -176,9 +177,10 @@ block content %}
       "flex flex-col justify-between bg-white p-6 rounded-lg shadow-md w-[30rem]";
     messageCon.innerHTML = "";
     chatBox.innerHTML = `
+    
     <div class="flex items-center space-x-4 rtl:space-x-reverse border-b border-gray-300 pb-4">
       <div class="shrink-0">
-        <img class="w-8 h-8 rounded-full" src="https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav" alt="Neil image" />
+        <img class="w-8 h-8 rounded-full" src="{{url_for('static',filename='src/avatar.PNG')}}" alt="Neil image" />
       </div>
       <div class="flex-1 min-w-0">
         <p class="text-lg font-medium text-gray-900 truncate dark:text-white">${
@@ -218,18 +220,17 @@ block content %}
   async function fetchMessages(userID) {
     await appendChatBox(userID);
     let messageContainer = document.getElementById("message-list");
-    messageContainer.innerHTML = "";
+    messageContainer.innerHTML = "No message found";
     setInterval(async () => {
       try {
         const response = await fetch("/messages/" + userID);
         const messages = await response.json();
         if (messages.error) {
-          messageContainer.innerHTML = "";
+          messageContainer.innerHTML = "No message found";
           return;
         }
         messageContainer.innerHTML = "";
-        const imgSrc =
-          "https://th.bing.com/th?id=ODL.22e3f8b3c7fb30c868537ff395d61b3a&w=146&h=146&c=7&rs=1&qlt=80&o=6&cb=15&pid=RichNav";
+        const imgSrc = "{{url_for('static',filename='src/avatar.PNG')}}";
         messages.forEach((msg) => {
           const messageDiv = document.createElement("div");
           messageDiv.className = `flex ${
@@ -278,7 +279,7 @@ block content %}
     // e.preventDefault();
     let content = document.getElementById("messageContent").value;
 
-    await fetch("/send", {
+    await fetch("/messages/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: content, receiver_id: receiverId }),

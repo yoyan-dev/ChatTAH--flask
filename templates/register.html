@@ -18,7 +18,7 @@
           <div class="flex flex-col items-center">
             <img
               class="rounded-full h-12 w-12"
-              src="https://th.bing.com/th/id/OIP.utANnR_yzqzbf8wKFvnnCAHaHa?rs=1&pid=ImgDetMain"
+              src="{{url_for('static',filename='src/logo.jpg')}}"
             />
             <h1 class="text-2xl font-semibold">ChatTAH!</h1>
           </div>
@@ -84,7 +84,7 @@
           </button>
           <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
             Already have an account?
-            <a href="/" class="text-blue-700 hover:underline dark:text-blue-500"
+            <a href="/auth/login" class="text-blue-700 hover:underline dark:text-blue-500"
               >Log in</a
             >
           </div>
