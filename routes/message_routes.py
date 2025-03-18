@@ -16,6 +16,7 @@ def get_messages(user_id):
 
     return jsonify([{
         "msgId": msg.msgId,
+        "image": current_user.image,
         "senderId": msg.senderId,
         "receiverId": msg.receiverId,
         "content": msg.content,

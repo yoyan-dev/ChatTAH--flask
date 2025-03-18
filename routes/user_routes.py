@@ -28,6 +28,7 @@ def get_user(user_id):
 
     return jsonify({
         "id": user.id,
+        "image": user.image,
         "username": user.username,
         "email": user.email,
         "message_count": message_count
@@ -77,6 +78,7 @@ def get_search_users(param):
         user_list.append({
             "id": user.id,
             "username": user.username,
+            "image": user.image,
             "email": user.email,
             "unread_count": unread_count,
             "last_message": last_message,
@@ -101,12 +103,7 @@ def profile():
         email = request.form.get('email')
 
         try:
-            if "file" not in request.files:
-                return jsonify({"error": "No file part"}), 400
-
             file = request.files["file"]
-            if file.filename == "":
-                return jsonify({"error": "No selected file"}), 400
 
             if file:
                 filename = secure_filename(file.filename)
@@ -120,8 +117,8 @@ def profile():
             g.user.email = email  
             db.session.commit()
         except Exception as e:
-            return jsonify({"error": str(e)}), 500  
+            return jsonify({"error": str(e)})  
 
-        return jsonify({"message": "Update successful"}), 200
+        return jsonify({"message": "Update successfully"})
 
     return render_template("profile.html", user=g.user)

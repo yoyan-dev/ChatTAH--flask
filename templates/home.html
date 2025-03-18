@@ -14,8 +14,7 @@ block content %}
       <div class="shrink-0">
         <img
           class="w-10 h-10 rounded-lg"
-          src="{{url_for('static',filename='src/avatar.PNG')}}"
-          alt="Neil image"
+          src="{{url_for('static', filename='uploads/' + user.image)}}"
         />
       </div>
       <div class="flex-1 min-w-0">
@@ -109,11 +108,9 @@ block content %}
             >
               <div class="flex items-center space-x-4 rtl:space-x-reverse">
                 <div class="shrink-0">
-                  <img
-                    class="w-8 h-8 rounded-full"
-                    src="{{url_for('static',filename='src/avatar.PNG')}}"
-                    alt="Neil image"
-                  />
+                  <img class="w-8 h-8 rounded-full"
+                  src="../static/uploads/${user.image}"
+                  alt="User image" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <p
@@ -181,8 +178,10 @@ block content %}
     
     <div class="flex items-center space-x-4 rtl:space-x-reverse border-b border-gray-300 pb-4">
       <div class="shrink-0">
-        <img class="w-8 h-8 rounded-full" src="{{url_for('static',filename='src/avatar.PNG')}}" alt="Neil image" />
-      </div>
+        <img class="w-8 h-8 rounded-full" src="../static/uploads/${
+          user.image
+        }" alt="Neil image" />
+        </div>
       <div class="flex-1 min-w-0">
         <p class="text-lg font-medium text-gray-900 truncate dark:text-white">${
           user.username
@@ -231,7 +230,6 @@ block content %}
           return;
         }
         messageContainer.innerHTML = "";
-        const imgSrc = "{{url_for('static',filename='src/avatar.PNG')}}";
         messages.forEach((msg) => {
           const messageDiv = document.createElement("div");
           messageDiv.className = `flex ${
@@ -242,7 +240,7 @@ block content %}
 
           const userImage =
             msg.senderId.toString() === userID.toString()
-              ? `<img class="w-8 h-8 rounded-full" src="${imgSrc}" alt="User Image" />`
+              ? `<img class="w-8 h-8 rounded-full" src="../static/uploads/${msg.image}" alt="User Image" />`
               : "";
           messageDiv.innerHTML = `
             ${userImage}
