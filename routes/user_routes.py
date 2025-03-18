@@ -1,8 +1,10 @@
-from flask import render_template, Blueprint, jsonify, g, session
+from flask import render_template, Blueprint, jsonify, g, session, request, url_for, current_app, redirect
 from flask_login import login_required
 from ..models.user import User
 from ..models.message import Message
-from ..extensions import login_manager
+from ..extensions import login_manager, db
+from werkzeug.utils import secure_filename
+import os
 
 bp = Blueprint("users", __name__)
 
@@ -10,14 +12,6 @@ bp = Blueprint("users", __name__)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@bp.before_request
-def load_logged_in_user():
-    user_id = session.get('user_id')
-    
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = User.query.get(user_id)
 
 @bp.route('/getuser/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -98,3 +92,36 @@ def home():
         return render_template('home.html', user=g.user)
     else:
         return render_template('index.html')
+
+@bp.route('/profile', methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        username = request.form.get('username')
+        email = request.form.get('email')
+
+        try:
+            if "file" not in request.files:
+                return jsonify({"error": "No file part"}), 400
+
+            file = request.files["file"]
+            if file.filename == "":
+                return jsonify({"error": "No selected file"}), 400
+
+            if file:
+                filename = secure_filename(file.filename)
+                upload_folder = current_app.config["UPLOAD_FOLDER"]
+                file_path = os.path.join(upload_folder, filename)
+                file.save(file_path)
+
+                g.user.image = filename  
+
+            g.user.username = username  
+            g.user.email = email  
+            db.session.commit()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500  
+
+        return jsonify({"message": "Update successful"}), 200
+
+    return render_template("profile.html", user=g.user)

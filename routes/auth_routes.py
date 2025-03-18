@@ -8,18 +8,28 @@ bp = Blueprint("auth", __name__)
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+        if existing_user:
+            return render_template('register.html', message='Username or email already exists! Please use a different one.')
 
         try:
-            user = User(username=username, email=email, password=password)
+            password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+
+            user = User(username=username, email=email, password_hash=password_hash, image="avatar.PNG")
+
             db.session.add(user)
             db.session.commit()
+
             flash('User registered successfully! You can now log in.', 'success')
-            return redirect(url_for('auth.login'))
-        except:
-            return render_template('register.html', message="Error! Please try again.")
+            return redirect(url_for('auth.login')) 
+
+        except Exception as e:
+            db.session.rollback()
+            return render_template('register.html', message=str(e))
 
     return render_template('register.html')
 
@@ -30,7 +40,7 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
 
-        if user and bcrypt.check_password_hash(user.password, password):
+        if user and bcrypt.check_password_hash(user.password_hash, password):
             login_user(user)
             session['user_id'] = user.id
             return redirect(url_for('users.home'))

@@ -8,6 +8,7 @@ block content %}
     </div>
     {% if user %}
     <a
+      href="{{ url_for('users.profile') }}"
       class="flex items-center space-x-4 rtl:space-x-reverse p-3 bg-gray-200 rounded-lg my-2"
     >
       <div class="shrink-0">
