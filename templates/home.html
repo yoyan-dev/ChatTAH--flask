@@ -190,7 +190,11 @@ block content %}
           user.email
         }</p>
       </div>
-      ${user.message_count > 0 ? '<div id="delete">delete</div>' : ""}
+      ${
+        user.message_count > 0
+          ? '<div id="delete" style="background: #f73d3d" class="p-2 rounded-lg">delete</div>'
+          : ""
+      }
     </div>
     <div class="overflow-auto flex flex-col-reverse gap-3 h-96  py-2" id="message-list">No message found</div>
     <div>

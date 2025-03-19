@@ -19,7 +19,7 @@ def get_user(user_id):
     user = User.query.get(user_id)
 
     if not user:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'error': f'User not found'}), 404
 
     message_count = Message.query.filter(
         ((Message.senderId == user.id) & (Message.receiverId == current_user.id)) |
@@ -49,7 +49,7 @@ def get_search_users(param):
     users = query.all()
 
     if not users:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'error': f'User not found'}), 404
 
     user_list = []
     
@@ -119,6 +119,16 @@ def profile():
         except Exception as e:
             return jsonify({"error": str(e)})  
 
-        return jsonify({"message": "Update successfully"})
+        return jsonify({"message": f"Update successfully"})
 
     return render_template("profile.html", user=g.user)
+
+@bp.route('/delete/<int:user_id>', methods=['GET'])
+@login_required
+def deleteUser(user_id):
+    try:
+        db.session.query(User).filter(User.id == user_id).delete()
+        db.session.commit()
+        return jsonify({"message": f"Account deleted successfully."})
+    except:
+        return jsonify({"error": "Error! Please try again."})

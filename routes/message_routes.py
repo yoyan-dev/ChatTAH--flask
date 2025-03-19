@@ -33,16 +33,16 @@ def send_message():
     current_user = g.user
 
     if not content or not receiver_id:
-        return jsonify({'error': 'Content and Receiver ID are required'}), 400
+        return jsonify({'error': f'Content and Receiver ID are required'}), 400
 
     try:
         message = Message(senderId=current_user.id, receiverId=receiver_id, content=content, status=status)
         db.session.add(message)
         db.session.commit()
-        return jsonify({'success': 'Message sent successfully'})
+        return jsonify({'success': f'Message sent successfully'})
     except:
         db.session.rollback()
-        return jsonify({'error': 'Database error!'}), 500
+        return jsonify({'error': f'Database error!'}), 500
 
 @bp.route('/updateMessageStatus/<int:user_id>', methods=['GET'])
 @login_required
@@ -59,9 +59,9 @@ def update_message_status(user_id):
             msg.status = "read"
 
         db.session.commit() 
-        return jsonify({"message": "Message status updated"})
+        return jsonify({"message": f"Message status updated"})
 
-    return jsonify({"message": "No unread messages found"})
+    return jsonify({"message": f"No unread messages found"})
 
 
 @bp.route('/deleteConvo/<int:user_id>', methods=['GET'])
@@ -80,4 +80,4 @@ def delete_messages(user_id):
     if deleted_count > 0:
         return jsonify({"message": f"Deleted {deleted_count} messages between users."})
     else:
-        return jsonify({"message": "No messages found to delete."})
+        return jsonify({"message": f"No messages found to delete."})
