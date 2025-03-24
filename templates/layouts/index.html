@@ -8,7 +8,7 @@
       rel="stylesheet"
       href="{{url_for('static',filename='dist/css/output.css')}}"
     /> -->
-    <link rel="icon" src="{{url_for('static',filename='src/logo.jpg')}}" />
+    <link rel="icon" href="{{url_for('static',filename='src/logo.jpg')}}" />
     <link
       rel="stylesheet"
       href="{{url_for('static',filename='dist/css/output.css')}}"
@@ -26,7 +26,7 @@
         <div class="flex gap-3 items-center">
           <img
             class="rounded-full h-10 w-10 border-2 border-blue-200"
-            src="{{url_for('static',filename='src/avatar.PNG')}}"
+            src="{{url_for('static',filename='uploads/'+g.user.image)}}"
           />
           <a href="{{ url_for('auth.logout') }}">Logout</a>
         </div>

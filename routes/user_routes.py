@@ -131,4 +131,4 @@ def deleteUser(user_id):
         db.session.commit()
         return jsonify({"message": f"Account deleted successfully."})
     except:
-        return jsonify({"error": "Error! Please try again."})
+        return jsonify({"error": f"Error! Please try again."})

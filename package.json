@@ -8,6 +8,6 @@
     "flowbite": "^3.1.2"
   },
   "scripts": {
-    "dev": "concurrently \"npx @tailwindcss/cli -i ./static/src/style.css -o /static/src/output.css --watch\" \"python -m flask run\""
+    "app": "concurrently \"npx @tailwindcss/cli -i ./static/src/style.css -o /static/src/output.css --watch\" \"python -m flask run\""
   }
 }

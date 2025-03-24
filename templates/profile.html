@@ -35,7 +35,7 @@ block content %}
     </div>
   </div>
   <div class="w-96 h-screen bg-white p-3 rounded" id="form">
-    <
+    <a href="#" onClick="onMount()">< back</a>
     <form
       id="profile-form"
       action="{{ url_for('users.profile') }}"
@@ -80,7 +80,6 @@ block content %}
         type="file"
         id="file"
         name="file"
-        onChange="onFileChange"
         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       />
       <br /><br />
@@ -91,12 +90,12 @@ block content %}
         src="{{ url_for('static', filename='uploads/' + user.image) }}"
         alt="Profile Picture"
         width="150"
+        id="image"
       />
       {% endif %}
-      <img src="" alt="Profile Picture" id="image" width="150" />
       <br /><br />
 
-      <button type="submit" class="bg-blue-500 text-white">
+      <button type="submit" class="bg-blue-500 text-white p-1 px-2 rounded-md">
         Update Profile
       </button>
     </form>
@@ -145,18 +144,22 @@ block content %}
       });
   });
 
-  function onFileChange(event) {
+  document.getElementById("file").addEventListener("change", (event) => {
+    const inputFile = document.getElementById("file");
     const preview = document.getElementById("image");
+    console.log(event);
     const file = event.target.files[0];
-    console.log(file);
     if (file) {
       const reader = new FileReader();
       reader.onload = function (e) {
         preview.src = e.target.result;
       };
+
       reader.readAsDataURL(file);
     }
-  }
+  });
+  // function onFileChange(event) {
+  // }
 
   async function deleteAccount() {
     let user_id = document
